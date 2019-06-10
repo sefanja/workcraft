@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':WorkcraftCore')
+    compile 'junit:junit:4.12'
+}

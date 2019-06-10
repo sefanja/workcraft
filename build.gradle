@@ -65,6 +65,7 @@ subprojects {
         compile fileTree(dir: '../ThirdParty/batik', include: ['*.jar'])
         compile 'org.jetbrains.kotlin:kotlin-stdlib'
         compile 'com.sun.activation:javax.activation:1.2.0'
+        compile 'com.google.guava:guava:27.0-jre'
 
         testCompile 'junit:junit:4.12'
         javacc 'net.java.dev.javacc:javacc:7.0.4'
@@ -162,6 +163,42 @@ subprojects {
     }
 }
 
+project(':NtaPlugin') {
+    configurations {
+        jaxb
+    }
+
+    dependencies {
+        jaxb (
+                'com.sun.xml.bind:jaxb-xjc:2.2.7',
+                'com.sun.xml.bind:jaxb-impl:2.2.7'
+        )
+    }
+
+    task jaxb {
+        def jaxbTargetDir = file("src-gen")
+
+        doLast {
+            jaxbTargetDir.mkdirs()
+
+            ant.taskdef(
+                    name: 'xjc',
+                    classname: 'com.sun.tools.xjc.XJCTask',
+                    classpath: configurations.jaxb.asPath
+            )
+            ant.jaxbTargetDir = jaxbTargetDir
+
+            ant.xjc(
+                    destdir: '${jaxbTargetDir}',
+                    package: 'org.workcraft.plugins.nta.uppaal',
+                    schema: 'res/schemas/uppaal.xsd'
+            )
+        }
+    }
+
+    compileJava.dependsOn jaxb
+}
+
 apply plugin: 'jacoco'
 
 def coverallsProjects = subprojects.findAll {
@@ -169,6 +206,7 @@ def coverallsProjects = subprojects.findAll {
     it.name == 'CircuitPlugin' ||
     it.name == 'MpsatSynthesisPlugin' ||
     it.name == 'MpsatVerificationPlugin' ||
+    it.name == 'NtaPlugin' ||
     it.name == 'PetrifyPlugin' ||
     it.name == 'PetriPlugin' ||
     it.name == 'StgPlugin' ||
