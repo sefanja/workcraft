@@ -121,7 +121,8 @@ public class TimesolverSerialiser implements ModelSerialiser {
         writeSynchronisedTransitions(out, transitionComposer, refs);
     }
 
-    private void writeSynchronisedTransitions(PrintWriter out, TransitionComposer transitionComposer, ReferenceProducer refs) {
+    private void writeSynchronisedTransitions(
+            PrintWriter out, TransitionComposer transitionComposer, ReferenceProducer refs) {
         for (Transition sender : transitionComposer.getSendersHavingReceivers()) {
             for (Transition receiver : transitionComposer.getReceiversHavingSenders(sender)) {
                 String senderTemplateName = refs.getReference(sender.getTemplate());
@@ -141,7 +142,8 @@ public class TimesolverSerialiser implements ModelSerialiser {
         }
     }
 
-    private void writeNonSynchronisedTransitions(PrintWriter out, Nta nta, TransitionComposer transitionComposer, ReferenceProducer refs) {
+    private void writeNonSynchronisedTransitions(
+            PrintWriter out, Nta nta, TransitionComposer transitionComposer, ReferenceProducer refs) {
         Set<Transition> nonSynchronisedTransitions = Sets.difference(
                 new HashSet<>(nta.getTransitions()),
                 transitionComposer.getSynchronisedTransitions());

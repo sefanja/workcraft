@@ -1,7 +1,6 @@
 package org.workcraft.plugins.nta.converters;
 
 import org.workcraft.plugins.nta.*;
-import org.workcraft.utils.Hierarchy;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,7 +21,7 @@ public class InstantiationConverter {
     }
 
     private void convertTopLevelVisualTextNotes() {
-        for (VisualTextNote srcVisualTextNote : Hierarchy.getChildrenOfType(srcModel.getRoot(), VisualTextNote.class)) {
+        for (VisualTextNote srcVisualTextNote : srcModel.getVisualTextNotes()) {
             TextNote dstTextNote = new TextNote(srcVisualTextNote.getReferencedTextNote());
             VisualTextNote dstVisualTextNote = new VisualTextNote(dstTextNote);
             dstVisualTextNote.copyPosition(srcVisualTextNote);

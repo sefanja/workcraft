@@ -18,7 +18,7 @@ public class TimeSolverExportUtils {
         Pattern pattern = Pattern.compile("\\b([a-zA-Z]\\w*)\\s*:?=\\s*0"); // e.g. x1 := 0
         Matcher matcher = pattern.matcher(assignments);
         ArrayList<String> resets = new ArrayList<>();
-        while(matcher.find()) {
+        while (matcher.find()) {
             resets.add(matcher.group(1));
         }
         if (resets.isEmpty()) {

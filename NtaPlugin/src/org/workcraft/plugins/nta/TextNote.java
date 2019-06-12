@@ -50,7 +50,8 @@ public class TextNote extends CommentNode {
      * Returns `null` if the text note cannot be found.
      */
     public static String findText(Container container, TextNote.Type type) {
-        Collection<TextNote> textNotes = Hierarchy.getChildrenOfType(container, TextNote.class, n -> n.getType() == type);
+        Collection<TextNote> textNotes =
+                Hierarchy.getChildrenOfType(container, TextNote.class, n -> n.getType() == type);
         if (textNotes.size() > 0) {
             return textNotes.iterator().next().getText();
         }
@@ -90,7 +91,8 @@ public class TextNote extends CommentNode {
                 Container container = Hierarchy.getNearestContainer(this);
                 if (container != null) {
                     if (Hierarchy.getChildrenOfType(container, this.getClass(), n -> n.getType() == value).size() > 0) {
-                        throw new RuntimeException("A text note of type " + value.name + " already exists at this level");
+                        throw new RuntimeException(
+                                "A text note of type " + value.name + " already exists at this level");
                     }
                 }
             }

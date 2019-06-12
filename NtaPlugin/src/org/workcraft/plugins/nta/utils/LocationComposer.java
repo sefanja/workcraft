@@ -64,7 +64,7 @@ public class LocationComposer {
                 .collect(toList());
     }
 
-    public Collection<Location> getCompositeByComponentLocations(Location ...componentLocations) {
+    public Collection<Location> getCompositeByComponentLocations(Location...componentLocations) {
         return getCompositeByComponentLocations(Arrays.asList(componentLocations));
     }
 

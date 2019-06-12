@@ -136,7 +136,8 @@ public class VisualTextNote extends VisualComment implements Collapsible {
     }
 
     protected void drawTypeInLocalSpace(DrawRequest r) {
-        cacheTypeRenderedText(getReferencedTextNote().getType().toString(), getNameFont(), getNamePositioning(), getNameOffset());
+        cacheTypeRenderedText(
+                getReferencedTextNote().getType().toString(), getNameFont(), getNamePositioning(), getNameOffset());
         Graphics2D g = r.getGraphics();
         Decoration d = r.getDecoration();
         g.setColor(Coloriser.colorise(getNameColor(), d.getColorisation()));

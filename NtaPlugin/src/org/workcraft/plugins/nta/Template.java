@@ -46,15 +46,11 @@ public class Template extends PageNode {
     }
 
     public Collection<Location> getLocations() {
-        return Hierarchy.getDescendantsOfType(this, Location.class);
+        return Hierarchy.getChildrenOfType(this, Location.class);
     }
 
     public Collection<Transition> getTransitions() {
-        return Hierarchy.getDescendantsOfType(this, Transition.class);
-    }
-
-    public Collection<TextNote> getTextNodes() {
-        return Hierarchy.getDescendantsOfType(this, TextNote.class);
+        return Hierarchy.getChildrenOfType(this, Transition.class);
     }
 
 }

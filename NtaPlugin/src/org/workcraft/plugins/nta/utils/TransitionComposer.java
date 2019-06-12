@@ -70,25 +70,25 @@ public class TransitionComposer {
         return compositeTransition;
     }
 
-    public static String composeAssignments(Transition ...transitions) {
+    public static String composeAssignments(Transition...transitions) {
         return Arrays.stream(transitions).map(Transition::getAssignments)
                 .filter(a -> a != null && !a.isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
-    public static String composeGuard(Transition ...transitions) {
+    public static String composeGuard(Transition...transitions) {
         return Arrays.stream(transitions).map(Transition::getGuard)
                 .filter(g -> g != null && !g.isEmpty())
                 .collect(Collectors.joining(" && "));
     }
 
-    public static String composeSelects(Transition ...transitions) {
+    public static String composeSelects(Transition...transitions) {
         return Arrays.stream(transitions).map(Transition::getSelects)
                 .filter(s -> s != null && !s.isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
-    public static String composeSynchronisation(Transition ...transitions) {
+    public static String composeSynchronisation(Transition...transitions) {
         return transitions[0].getSynchronisationName(); // by definition, all names should be equal
     }
 

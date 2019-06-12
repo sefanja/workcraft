@@ -11,7 +11,7 @@ import org.workcraft.plugins.nta.interop.UppaalImporter;
 import org.workcraft.utils.ScriptableCommandUtils;
 
 public class NtaPlugin implements Plugin {
-    
+
     @Override
     public String getDescription() {
         return "Network of Timed Automata";

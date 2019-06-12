@@ -57,7 +57,8 @@ public class ParallelCompositionConverter {
             Location srcFirstLocation = srcTransition.getFirst();
             Location srcSecondLocation = srcTransition.getSecond();
 
-            Collection<Location> dstFirstLocations = locationComposer.getCompositeByComponentLocations(srcFirstLocation);
+            Collection<Location> dstFirstLocations =
+                    locationComposer.getCompositeByComponentLocations(srcFirstLocation);
 
             for (Location dstFirstLocation : dstFirstLocations) {
                 Location dstSecondLocation = locationComposer.findCompositeSecondLocation(
@@ -80,14 +81,15 @@ public class ParallelCompositionConverter {
                 srcSecondLocations.add(srcSender.getSecond());
                 srcSecondLocations.add(srcReceiver.getSecond());
 
-                Collection<Location> dstFirstLocations = locationComposer.getCompositeByComponentLocations(srcFirstLocations);
+                Collection<Location> dstFirstLocations =
+                        locationComposer.getCompositeByComponentLocations(srcFirstLocations);
 
                 for (Location dstFirstLocation : dstFirstLocations) {
                     Location dstSecondLocation = locationComposer.findCompositeSecondLocation(
                             dstFirstLocation, srcFirstLocations, srcSecondLocations);
 
-                    Transition dstTransition =
-                            TransitionComposer.composeTransition(dstFirstLocation, dstSecondLocation, srcSender, srcReceiver);
+                    Transition dstTransition = TransitionComposer.composeTransition(
+                            dstFirstLocation, dstSecondLocation, srcSender, srcReceiver);
                     dstTemplate.add(dstTransition);
                 }
             }

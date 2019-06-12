@@ -158,7 +158,8 @@ public class UppaalImporter implements Importer {
     /**
      * Imports `/nta/template/location`
      */
-    private Map<Location, VisualLocation> importLocations(VisualNta vNta, Template uTemplate, VisualTemplate vTemplate) {
+    private Map<Location, VisualLocation> importLocations(
+            VisualNta vNta, Template uTemplate, VisualTemplate vTemplate) {
         org.workcraft.plugins.nta.Template mTemplate = vTemplate.getReferencedTemplate();
 
         Map<Location, VisualLocation> locationMap = new HashMap<>();
@@ -184,12 +185,12 @@ public class UppaalImporter implements Importer {
             for (Label uLabel : uLocation.getLabel()) {
                 String value = uLabel.getValue();
                 switch (uLabel.getKind()) {
-                    case "comments":
-                        mLocation.setComments(value);
-                        break;
-                    case "invariant":
-                        mLocation.setInvariant(value);
-                        break;
+                case "comments":
+                    mLocation.setComments(value);
+                    break;
+                case "invariant":
+                    mLocation.setInvariant(value);
+                    break;
                 }
             }
         }
@@ -229,21 +230,21 @@ public class UppaalImporter implements Importer {
                 for (Label uLabel : uTransition.getLabel()) {
                     String value = uLabel.getValue();
                     switch (uLabel.getKind()) {
-                        case "assignment":
-                            mTransition.setAssignments(value);
-                            break;
-                        case "comments":
-                            mTransition.setComments(value);
-                            break;
-                        case "guard":
-                            mTransition.setGuard(value);
-                            break;
-                        case "select":
-                            mTransition.setSelects(value);
-                            break;
-                        case "synchronisation":
-                            mTransition.setSynchronisation(value);
-                            break;
+                    case "assignment":
+                        mTransition.setAssignments(value);
+                        break;
+                    case "comments":
+                        mTransition.setComments(value);
+                        break;
+                    case "guard":
+                        mTransition.setGuard(value);
+                        break;
+                    case "select":
+                        mTransition.setSelects(value);
+                        break;
+                    case "synchronisation":
+                        mTransition.setSynchronisation(value);
+                        break;
                     }
                 }
 
@@ -298,7 +299,7 @@ public class UppaalImporter implements Importer {
      * Distributes visual components.
      */
     private void distributeVisualComponents(VisualNta vNta) {
-        for (VisualTextNote vTextNote: Hierarchy.getDescendantsOfType(vNta.getRoot(), VisualTextNote.class)) {
+        for (VisualTextNote vTextNote : Hierarchy.getDescendantsOfType(vNta.getRoot(), VisualTextNote.class)) {
             vTextNote.cacheLabelRenderedText(); // needed to better estimate the bounding box
         }
 
@@ -315,7 +316,7 @@ public class UppaalImporter implements Importer {
 
         // distribute VisualTemplates
         double hOffset = maxWidth + MARGIN;
-        for (VisualTemplate vTemplate: Hierarchy.getChildrenOfType(vNta.getRoot(), VisualTemplate.class)) {
+        for (VisualTemplate vTemplate: vNta.getVisualTemplates()) {
             Point2D pos = vTemplate.getPosition();
             vTemplate.setPosition(new Point2D.Double(pos.getX() + hOffset, pos.getY()));
             hOffset += vTemplate.getBoundingBox().getWidth() + MARGIN;

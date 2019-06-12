@@ -52,7 +52,8 @@ public class VisualNta extends AbstractVisualModel {
             Location mSecond = (Location) getReferencedComponent(second);
             mTransition = ((Nta) getMathModel()).connect(mFirst, mSecond);
         }
-        VisualTransition vConnection = new VisualTransition(mTransition, (VisualLocation) first, (VisualLocation) second);
+        VisualTransition vConnection =
+                new VisualTransition(mTransition, (VisualLocation) first, (VisualLocation) second);
         Container container = Hierarchy.getNearestContainer(first, second);
         container.add(vConnection);
         return vConnection;
@@ -78,7 +79,15 @@ public class VisualNta extends AbstractVisualModel {
     }
 
     public Collection<VisualTemplate> getVisualTemplates() {
-        return Hierarchy.getDescendantsOfType(this.getRoot(), VisualTemplate.class);
+        return Hierarchy.getChildrenOfType(this.getRoot(), VisualTemplate.class);
+    }
+
+    public Collection<VisualTextNote> getVisualTextNotes() {
+        return Hierarchy.getChildrenOfType(this.getRoot(), VisualTextNote.class);
+    }
+
+    public Collection<VisualTextNote> getAllVisualTextNotes() {
+        return Hierarchy.getDescendantsOfType(this.getRoot(), VisualTextNote.class);
     }
 
 }
