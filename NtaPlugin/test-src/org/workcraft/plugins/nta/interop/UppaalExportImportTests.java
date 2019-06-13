@@ -1,15 +1,13 @@
 package org.workcraft.plugins.nta.interop;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.workcraft.Framework;
-import org.workcraft.dom.Node;
 import org.workcraft.exceptions.DeserialisationException;
 import org.workcraft.exceptions.SerialisationException;
+import org.workcraft.plugins.nta.TestUtils;
 import org.workcraft.plugins.nta.VisualNta;
 import org.workcraft.utils.FileUtils;
-import org.workcraft.utils.Hierarchy;
 import org.workcraft.utils.PackageUtils;
 import org.workcraft.utils.WorkspaceUtils;
 import org.workcraft.workspace.ModelEntry;
@@ -20,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 
 public class UppaalExportImportTests {
 
@@ -96,23 +93,10 @@ public class UppaalExportImportTests {
         VisualNta importedExport = new UppaalImporter().importUppaalSystem(uppaalStream);
 
         // compare chained export and import to original model
-        Assert.assertEquals(countNodesByClass(original), countNodesByClass(importedExport));
+        TestUtils.assertNtaEquals(original.getReferencedNta(), importedExport.getReferencedNta());
 
         framework.closeWork(we);
         FileUtils.deleteOnExitRecursively(directory);
-    }
-
-    private HashMap<Class, Integer> countNodesByClass(VisualNta vNta) {
-        final HashMap<Class, Integer> counter = new HashMap<>();
-        for (Node node : Hierarchy.getDescendants(vNta.getRoot())) {
-            Class c = node.getClass();
-            if (!counter.containsKey(c)) {
-                counter.put(c, 1);
-            } else {
-                counter.put(c, counter.get(c) + 1);
-            }
-        }
-        return counter;
     }
 
 }

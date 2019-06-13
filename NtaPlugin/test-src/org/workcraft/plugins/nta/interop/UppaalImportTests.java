@@ -1,20 +1,17 @@
 package org.workcraft.plugins.nta.interop;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.workcraft.Framework;
-import org.workcraft.dom.Node;
 import org.workcraft.exceptions.DeserialisationException;
+import org.workcraft.plugins.nta.TestUtils;
 import org.workcraft.plugins.nta.VisualNta;
-import org.workcraft.utils.Hierarchy;
 import org.workcraft.utils.PackageUtils;
 import org.workcraft.utils.WorkspaceUtils;
 import org.workcraft.workspace.WorkspaceEntry;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 
 public class UppaalImportTests {
 
@@ -82,20 +79,7 @@ public class UppaalImportTests {
         framework.closeWork(we);
 
         // compare UPPAAL to Work
-        Assert.assertEquals(countNodesByClass(loaded), countNodesByClass(imported));
-    }
-
-    private HashMap<Class, Integer> countNodesByClass(VisualNta vNta) {
-        final HashMap<Class, Integer> counter = new HashMap<>();
-        for (Node node : Hierarchy.getDescendants(vNta.getRoot())) {
-            Class c = node.getClass();
-            if (!counter.containsKey(c)) {
-                counter.put(c, 1);
-            } else {
-                counter.put(c, counter.get(c) + 1);
-            }
-        }
-        return counter;
+        TestUtils.assertNtaEquals(loaded.getReferencedNta(), imported.getReferencedNta());
     }
 
 }

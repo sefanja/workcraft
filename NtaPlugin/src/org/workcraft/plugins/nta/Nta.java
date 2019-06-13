@@ -29,23 +29,23 @@ public class Nta extends AbstractMathModel {
         return transition;
     }
 
-    public Collection<Transition> getTransitions() {
+    public Collection<Transition> getAllTransitions() {
         return Hierarchy.getDescendantsOfType(this.getRoot(), Transition.class);
     }
 
     public Collection<Template> getTemplates() {
-        return Hierarchy.getDescendantsOfType(this.getRoot(), Template.class);
+        return Hierarchy.getChildrenOfType(this.getRoot(), Template.class);
     }
 
-    public Collection<Location> getLocations() {
+    public Collection<Location> getAllLocations() {
         return Hierarchy.getDescendantsOfType(this.getRoot(), Location.class);
     }
 
-    public Collection<Location> getLocations(Func<Location, Boolean> filter) {
+    public Collection<Location> getAllLocations(Func<Location, Boolean> filter) {
         return Hierarchy.getDescendantsOfType(this.getRoot(), Location.class, filter);
     }
 
-    public Collection<Transition> getTransitions(Func<Transition, Boolean> filter) {
+    public Collection<Transition> getAllTransitions(Func<Transition, Boolean> filter) {
         return Hierarchy.getDescendantsOfType(this.getRoot(), Transition.class, filter);
     }
 

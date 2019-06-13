@@ -16,14 +16,14 @@ public class TransitionComposer {
         senderToReceiversMap = new HashMap<>();
 
         Collection<Transition> senders = new ArrayList<>();
-        for (Transition transition : nta.getTransitions()) {
+        for (Transition transition : nta.getAllTransitions()) {
             if (transition.isSender()) {
                 senders.add(transition);
             }
         }
 
         Collection<Transition> receivers = new ArrayList<>();
-        for (Transition transition : nta.getTransitions()) {
+        for (Transition transition : nta.getAllTransitions()) {
             if (transition.isReceiver()) {
                 receivers.add(transition);
             }

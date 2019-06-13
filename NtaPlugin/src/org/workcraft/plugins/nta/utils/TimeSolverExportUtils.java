@@ -30,10 +30,10 @@ public class TimeSolverExportUtils {
 
     public static Collection<String> getClocks(Nta nta) {
         Set<String> clocks = new HashSet<>();
-        for (Location location : nta.getLocations()) {
+        for (Location location : nta.getAllLocations()) {
             addClocks(clocks, location.getInvariant());
         }
-        for (Transition transition : nta.getTransitions()) {
+        for (Transition transition : nta.getAllTransitions()) {
             addClocks(clocks, transition.getAssignments());
             addClocks(clocks, transition.getGuard());
         }

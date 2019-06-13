@@ -51,7 +51,7 @@ public class ParallelCompositionConverter {
 
     private void convertNonSynchronisedTransitions(TransitionComposer transitionComposer) {
         Set<Transition> nonSynchronisedTransitions = Sets.difference(
-                new HashSet<>(srcModel.getTransitions()),
+                new HashSet<>(srcModel.getAllTransitions()),
                 transitionComposer.getSynchronisedTransitions());
         for (Transition srcTransition : nonSynchronisedTransitions) {
             Location srcFirstLocation = srcTransition.getFirst();
@@ -97,10 +97,10 @@ public class ParallelCompositionConverter {
     }
 
     private void removeUnreachableTransitions() {
-        Set<Transition> allTransitions = new HashSet<>(dstModel.getTransitions());
+        Set<Transition> allTransitions = new HashSet<>(dstModel.getAllTransitions());
 
         Set<Transition> reachableTransitions = new HashSet<>();
-        Location initialLocation = dstModel.getLocations(Location::isInitial).iterator().next();
+        Location initialLocation = dstModel.getAllLocations(Location::isInitial).iterator().next();
         findReachableTransitions(initialLocation, reachableTransitions);
 
         Set<Transition> unreachableTransitions = Sets.difference(allTransitions, reachableTransitions);
@@ -108,7 +108,7 @@ public class ParallelCompositionConverter {
     }
 
     private void findReachableTransitions(Location location, Set<Transition> reachableTransitions) {
-        Collection<Transition> outTransitions = dstModel.getTransitions(t -> t.getFirst().equals(location));
+        Collection<Transition> outTransitions = dstModel.getAllTransitions(t -> t.getFirst().equals(location));
         if (reachableTransitions.containsAll(outTransitions)) {
             return;
         }
@@ -119,10 +119,10 @@ public class ParallelCompositionConverter {
     private void removeUnreachableLocations() {
         // unreachable transitions are assumed to have been removed
 
-        Set<Location> allLocations = new HashSet<>(dstModel.getLocations());
+        Set<Location> allLocations = new HashSet<>(dstModel.getAllLocations());
 
         Set<Location> reachableLocations = new HashSet<>();
-        for (Transition transition : dstModel.getTransitions()) {
+        for (Transition transition : dstModel.getAllTransitions()) {
             reachableLocations.add(transition.getFirst());
             reachableLocations.add(transition.getSecond());
         }

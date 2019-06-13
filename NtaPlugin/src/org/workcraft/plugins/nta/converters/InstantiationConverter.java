@@ -41,10 +41,11 @@ public class InstantiationConverter {
     }
 
     private void createDstVisualTemplate(VisualTemplate srcVisualTemplate, boolean rename, int instanceNumber) {
-        Template dstTemplate = new Template();
+        Template srcTemplate = srcVisualTemplate.getReferencedTemplate();
+        Template dstTemplate = new Template(srcTemplate);
+        dstTemplate.setInstanceCount(1);
         dstModel.getReferencedNta().add(dstTemplate);
-        String dstTemplateName = srcModel.getReferencedNta()
-                .getName(srcVisualTemplate.getReferencedTemplate()) + (rename ? instanceNumber : "");
+        String dstTemplateName = srcModel.getReferencedNta().getName(srcTemplate) + (rename ? instanceNumber : "");
         dstModel.getReferencedNta().setName(dstTemplate, dstTemplateName);
 
         VisualTemplate dstVisualTemplate = new VisualTemplate(dstTemplate);

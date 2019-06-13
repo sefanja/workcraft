@@ -20,6 +20,15 @@ public class Template extends PageNode {
     private int instanceCount = 1;
     private String parameters;
 
+    public Template() {
+    }
+
+    // for making copies
+    public Template(Template template) {
+        instanceCount = template.instanceCount;
+        parameters = template.parameters;
+    }
+
     public int getInstanceCount() {
         return instanceCount;
     }

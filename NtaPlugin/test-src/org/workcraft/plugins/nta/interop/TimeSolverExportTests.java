@@ -50,7 +50,7 @@ public class TimeSolverExportTests {
         final BufferedReader expected = new BufferedReader(
                 new InputStreamReader(Objects.requireNonNull(classLoader.getResourceAsStream(tsName))));
 
-        // count lines (can be more sophisticated of the implementation of a TimeSolver parser)
+        // count lines (can be more sophisticated after the implementation of a TimeSolver parser)
         int actualLines = 0;
         while (actual.readLine() != null) actualLines++;
         int expectedLines = 0;
