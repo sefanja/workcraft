@@ -78,33 +78,33 @@ public class TestUtils {
     private static void assertPropertiesEqual(Location expectedLocation, Location actualLocation) {
         Assert.assertNotNull(actualLocation);
         assertStringEquals(expectedLocation.getComments(), actualLocation.getComments());
-        assertInvariantsEquals(expectedLocation.getInvariant(), actualLocation.getInvariant());
+        assertExpressionEquals(expectedLocation.getInvariant(), actualLocation.getInvariant());
         Assert.assertEquals(expectedLocation.isCommitted(), actualLocation.isCommitted());
         Assert.assertEquals(expectedLocation.isInitial(), actualLocation.isInitial());
         Assert.assertEquals(expectedLocation.isUrgent(), actualLocation.isUrgent());
     }
 
-    private static void assertInvariantsEquals(String expectedInvariant, String actualInvariant) {
-        if (expectedInvariant.contains("&&")) {
-            String[] expectedSplit = expectedInvariant.split("&&");
+    private static void assertPropertiesEqual(Transition expectedTransition, Transition actualTransition) {
+        Assert.assertNotNull(actualTransition);
+        assertExpressionEquals(expectedTransition.getAssignments(), actualTransition.getAssignments());
+        assertStringEquals(expectedTransition.getComments(), actualTransition.getComments());
+        assertExpressionEquals(expectedTransition.getGuard(), actualTransition.getGuard());
+        assertExpressionEquals(expectedTransition.getSelects(), actualTransition.getSelects());
+        assertStringEquals(expectedTransition.getSynchronisation(), actualTransition.getSynchronisation());
+    }
+
+    private static void assertExpressionEquals(String expectedExpression, String actualExpression) {
+        if (expectedExpression != null && actualExpression != null) {
+            String[] expectedSplit = expectedExpression.split("(&&|,)");
             Set<String> expectedSet = Arrays.stream(expectedSplit).map(String::trim).collect(Collectors.toSet());
 
-            String[] actualSplit = actualInvariant.split("&&");
+            String[] actualSplit = actualExpression.split("(&&|,)");
             Set<String> actualSet = Arrays.stream(actualSplit).map(String::trim).collect(Collectors.toSet());
 
             Assert.assertEquals(expectedSet, actualSet);
         } else {
-            assertStringEquals(expectedInvariant, actualInvariant);
+            assertStringEquals(expectedExpression, actualExpression);
         }
-    }
-
-    private static void assertPropertiesEqual(Transition expectedTransition, Transition actualTransition) {
-        Assert.assertNotNull(actualTransition);
-        assertStringEquals(expectedTransition.getAssignments(), actualTransition.getAssignments());
-        assertStringEquals(expectedTransition.getComments(), actualTransition.getComments());
-        assertStringEquals(expectedTransition.getGuard(), actualTransition.getGuard());
-        assertStringEquals(expectedTransition.getSelects(), actualTransition.getSelects());
-        assertStringEquals(expectedTransition.getSynchronisation(), actualTransition.getSynchronisation());
     }
 
     private static void assertStringEquals(String expectedString, String actualString) {
