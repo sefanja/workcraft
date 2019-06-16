@@ -4,7 +4,7 @@ import org.workcraft.Framework;
 import org.workcraft.plugins.Plugin;
 import org.workcraft.plugins.PluginManager;
 import org.workcraft.plugins.nta.commands.InstantiationConversionCommand;
-import org.workcraft.plugins.nta.commands.ParallelCompositionConversionCommand;
+import org.workcraft.plugins.nta.commands.ParallelCompositionIncrementalConversionCommand;
 import org.workcraft.plugins.nta.interop.TimesolverExporter;
 import org.workcraft.plugins.nta.interop.UppaalExporter;
 import org.workcraft.plugins.nta.interop.UppaalImporter;
@@ -32,7 +32,7 @@ public class NtaPlugin implements Plugin {
 
         ScriptableCommandUtils.register(InstantiationConversionCommand.class, "convertToInstantiation",
                 "instantiate automata templates");
-        ScriptableCommandUtils.register(ParallelCompositionConversionCommand.class, "convertToParallelComposition",
+        ScriptableCommandUtils.register(ParallelCompositionIncrementalConversionCommand.class, "convertToParallelComposition",
                 "compute a parallel composition");
     }
 

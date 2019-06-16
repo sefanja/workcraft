@@ -12,7 +12,7 @@ import org.workcraft.workspace.WorkspaceEntry;
 
 import java.net.URL;
 
-public class ParallelCompositionConversionCommandTests {
+public class ParallelCompositionIncrementalConversionCommandTests {
 
     @BeforeClass
     public static void init() {
@@ -43,7 +43,7 @@ public class ParallelCompositionConversionCommandTests {
         Nta expectedModel = WorkspaceUtils.getAs(expectedWe, Nta.class);
 
         // convert srcModel to actualModel
-        ParallelCompositionConversionCommand command = new ParallelCompositionConversionCommand();
+        ParallelCompositionIncrementalConversionCommand command = new ParallelCompositionIncrementalConversionCommand();
         WorkspaceEntry dstWe = command.execute(srcWe);
         Nta actualModel = WorkspaceUtils.getAs(dstWe, Nta.class);
 
