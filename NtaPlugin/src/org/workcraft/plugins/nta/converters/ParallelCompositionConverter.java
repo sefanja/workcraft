@@ -7,128 +7,166 @@ import org.workcraft.plugins.nta.utils.TransitionComposer;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.toSet;
+
 public class ParallelCompositionConverter {
 
     private final Nta srcModel;
     private final Nta dstModel;
 
-    private final Template dstTemplate;
-    private final LocationComposer locationComposer;
+    private final TransitionComposer transitionComposer;
+    private final Set<Transition> dstTransitions;
+    private final Map<Location, Set<Location>> dstLocations;
+
+    private final Set<Location> todo;
+    private final Set<Location> done;
 
     public ParallelCompositionConverter(VisualNta srcModel, Nta dstModel) {
+
         // initialise before composing
         InstantiationConverter instantiationConverter = new InstantiationConverter(srcModel, new VisualNta(new Nta()));
         this.srcModel = instantiationConverter.getDstModel().getReferencedNta();
         this.dstModel = dstModel;
-        locationComposer = new LocationComposer(this.srcModel);
-        dstTemplate = convertTemplates(); // single template in dstModel
-        convertLocations();
-        convertTransitions();
-        removeUnreachableTransitions();
-        removeUnreachableLocations();
+
+        Nta instantiatedNta = (Nta) instantiationConverter.getDstModel().getMathModel();
+        transitionComposer = new TransitionComposer(instantiatedNta);
+
+        dstTransitions = new HashSet<>();
+        dstLocations = new HashMap<>();
+
+        todo = new HashSet<>();
+        done = new HashSet<>();
+
+        addInitialDstLocation(instantiatedNta);
+
+        while (!todo.isEmpty()) {
+            Location nextDstLocation = todo.stream().findAny().get();
+            todo.remove(nextDstLocation);
+            done.add(nextDstLocation);
+
+            Set<Transition> nonSynchronisedTransitions = getOutgoingNonSynchronisedTransitions(nextDstLocation);
+            processDstTransitions(nonSynchronisedTransitions);
+
+            Set<Transition> synchronisedTransitions = getOutgoingSynchronisedTransitions(nextDstLocation);
+            processDstTransitions(synchronisedTransitions);
+        }
+
+        populateDstModel();
     }
 
-    private Template convertTemplates() {
-        Template dstTemplate = new Template();
-        dstModel.add(dstTemplate);
-        dstModel.setName(dstTemplate, "ParallelComposition");
-        return dstTemplate;
+    private void addInitialDstLocation(Nta instantiatedNta) {
+        Set<Location> initialSrcLocations = instantiatedNta.getAllLocations().stream().filter(Location::isInitial).collect(toSet());
+        Location initialDstLocation = LocationComposer.composeLocation(initialSrcLocations);
+        todo.add(initialDstLocation);
+        dstLocations.put(initialDstLocation, initialSrcLocations);
     }
 
-    private void convertLocations() {
-        Collection<Location> dstLocations = locationComposer.getCompositeLocations();
-        dstTemplate.add(dstLocations);
-        for (Location dstLocation : dstLocations) {
-            dstModel.setName(dstLocation, locationComposer.getName(dstLocation));
+    private void populateDstModel() {
+        Template template = new Template();
+        dstModel.add(template);
+        dstModel.setName(template, "ParallelComposition");
+
+        template.add(dstTransitions);
+
+        Set<Location> locations = dstLocations.keySet();
+        template.add(locations);
+        for (Location location : locations) {
+            String name = generateDstLocationName(location);
+            dstModel.setName(location, name);
         }
     }
 
-    private void convertTransitions() {
-        TransitionComposer transitionComposer = new TransitionComposer(srcModel);
-        convertNonSynchronisedTransitions(transitionComposer);
-        convertSynchronisedTransitions(transitionComposer);
+    private void processDstTransitions(Set<Transition> dstTransitions) {
+        this.dstTransitions.addAll(dstTransitions);
+        for (Transition dstTransition : dstTransitions) {
+            Location dstSecondLocation = dstTransition.getSecond();
+            if (!done.contains(dstSecondLocation)) {
+                todo.add(dstSecondLocation);
+            }
+        }
     }
 
-    private void convertNonSynchronisedTransitions(TransitionComposer transitionComposer) {
-        Set<Transition> nonSynchronisedTransitions = Sets.difference(
+    private Set<Transition> getOutgoingNonSynchronisedTransitions(Location dstFirstLocation) {
+        Set<Transition> dstTransitions = new HashSet<>();
+        Set<Location> srcFirstLocations = getSrcLocations(dstFirstLocation);
+
+        Set<Transition> nonSynchronisedSrcTransitions = Sets.difference(
                 new HashSet<>(srcModel.getAllTransitions()),
                 transitionComposer.getSynchronisedTransitions());
-        for (Transition srcTransition : nonSynchronisedTransitions) {
-            Location srcFirstLocation = srcTransition.getFirst();
-            Location srcSecondLocation = srcTransition.getSecond();
+        Set<Transition> outgoingSrcTransitions = nonSynchronisedSrcTransitions.stream()
+                .filter(t -> srcFirstLocations.contains(t.getFirst())).collect(toSet());
 
-            Collection<Location> dstFirstLocations =
-                    locationComposer.getCompositeByComponentLocations(srcFirstLocation);
+        for (Transition srcTransition : outgoingSrcTransitions) {
+            Set<Location> srcSecondLocations = getSecondLocations(srcFirstLocations, srcTransition);
+            Location dstSecondLocation = findOrCreateDstSecondLocation(srcSecondLocations);
+            Transition dstTransition = new Transition(srcTransition, dstFirstLocation, dstSecondLocation);
+            dstTransitions.add(dstTransition);
+        }
 
-            for (Location dstFirstLocation : dstFirstLocations) {
-                Location dstSecondLocation = locationComposer.findCompositeSecondLocation(
-                        dstFirstLocation, srcFirstLocation, srcSecondLocation);
+        return dstTransitions;
+    }
 
-                Transition dstTransition = new Transition(srcTransition, dstFirstLocation, dstSecondLocation);
-                dstTemplate.add(dstTransition);
+    private Set<Transition> getOutgoingSynchronisedTransitions(Location dstFirstLocation) {
+        Set<Transition> dstTransitions = new HashSet<>();
+        Set<Location> srcFirstLocations = getSrcLocations(dstFirstLocation);
+
+        Collection<Transition> srcSendersHavingReceivers = transitionComposer.getSendersHavingReceivers();
+        Set<Transition> srcOutgoingSenders = srcSendersHavingReceivers.stream()
+                .filter(t -> srcFirstLocations.contains(t.getFirst())).collect(toSet());
+
+        for (Transition srcSender : srcOutgoingSenders) {
+            Collection<Transition> srcReceiversHavingSenders = transitionComposer.getReceiversHavingSenders(srcSender);
+            Set<Transition> srcOutgoingReceivers = srcReceiversHavingSenders.stream()
+                    .filter(t -> srcFirstLocations.contains(t.getFirst())).collect(toSet());
+            for (Transition srcReceiver : srcOutgoingReceivers) {
+                Set<Location> srcSecondLocations = getSecondLocations(srcFirstLocations, srcSender, srcReceiver);
+                Location dstSecondLocation = findOrCreateDstSecondLocation(srcSecondLocations);
+                Transition dstTransition = TransitionComposer.composeTransition(dstFirstLocation, dstSecondLocation, srcSender, srcReceiver);
+                dstTransitions.add(dstTransition);
             }
         }
+
+        return dstTransitions;
     }
 
-    private void convertSynchronisedTransitions(TransitionComposer transitionComposer) {
-        for (Transition srcSender : transitionComposer.getSendersHavingReceivers()) {
-            for (Transition srcReceiver : transitionComposer.getReceiversHavingSenders(srcSender)) {
-                Set<Location> srcFirstLocations = new HashSet<>();
-                srcFirstLocations.add(srcSender.getFirst());
-                srcFirstLocations.add(srcReceiver.getFirst());
+    /**
+     * Gets the set of locations that we arrive at when starting at the `firstLocations` and taking the `transitions`.
+     */
+    private Set<Location> getSecondLocations(Set<Location> firstLocations, Transition...transitions) {
+        Set<Location> secondLocations = new HashSet<>(firstLocations);
+        for (Transition transition : transitions) {
+            secondLocations.remove(transition.getFirst());
+            secondLocations.add(transition.getSecond());
+        }
+        return  secondLocations;
+    }
 
-                Set<Location> srcSecondLocations = new HashSet<>();
-                srcSecondLocations.add(srcSender.getSecond());
-                srcSecondLocations.add(srcReceiver.getSecond());
+    private Location findOrCreateDstSecondLocation(Set<Location> srcSecondLocations) {
+        Location dstSecondLocation;
+        if (dstLocations.containsValue(srcSecondLocations)) {
+            dstSecondLocation = getKeyByValue(dstLocations, srcSecondLocations);
+        } else {
+            dstSecondLocation = LocationComposer.composeLocation(srcSecondLocations);
+            dstLocations.put(dstSecondLocation, srcSecondLocations);
+        }
+        return dstSecondLocation;
+    }
 
-                Collection<Location> dstFirstLocations =
-                        locationComposer.getCompositeByComponentLocations(srcFirstLocations);
+    private String generateDstLocationName(Location dstLocation) {
+        return LocationComposer.composeName(getSrcLocations(dstLocation), srcModel);
+    }
 
-                for (Location dstFirstLocation : dstFirstLocations) {
-                    Location dstSecondLocation = locationComposer.findCompositeSecondLocation(
-                            dstFirstLocation, srcFirstLocations, srcSecondLocations);
+    private Set<Location> getSrcLocations(Location dstLocation) {
+        return dstLocations.get(dstLocation);
+    }
 
-                    Transition dstTransition = TransitionComposer.composeTransition(
-                            dstFirstLocation, dstSecondLocation, srcSender, srcReceiver);
-                    dstTemplate.add(dstTransition);
-                }
+    private <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Map.Entry<T, E> entry : map.entrySet()) {
+            if (Objects.equals(value, entry.getValue())) {
+                return entry.getKey();
             }
         }
-    }
-
-    private void removeUnreachableTransitions() {
-        Set<Transition> allTransitions = new HashSet<>(dstModel.getAllTransitions());
-
-        Set<Transition> reachableTransitions = new HashSet<>();
-        Location initialLocation = dstModel.getAllLocations(Location::isInitial).iterator().next();
-        findReachableTransitions(initialLocation, reachableTransitions);
-
-        Set<Transition> unreachableTransitions = Sets.difference(allTransitions, reachableTransitions);
-        dstModel.remove(unreachableTransitions);
-    }
-
-    private void findReachableTransitions(Location location, Set<Transition> reachableTransitions) {
-        Collection<Transition> outTransitions = dstModel.getAllTransitions(t -> t.getFirst().equals(location));
-        if (reachableTransitions.containsAll(outTransitions)) {
-            return;
-        }
-        reachableTransitions.addAll(outTransitions);
-        outTransitions.forEach(t -> findReachableTransitions(t.getSecond(), reachableTransitions));
-    }
-
-    private void removeUnreachableLocations() {
-        // unreachable transitions are assumed to have been removed
-
-        Set<Location> allLocations = new HashSet<>(dstModel.getAllLocations());
-
-        Set<Location> reachableLocations = new HashSet<>();
-        for (Transition transition : dstModel.getAllTransitions()) {
-            reachableLocations.add(transition.getFirst());
-            reachableLocations.add(transition.getSecond());
-        }
-
-        Collection<Location> unreachableLocations = Sets.difference(allLocations, reachableLocations);
-        dstModel.remove(unreachableLocations);
+        return null;
     }
 
     public Nta getDstModel() {

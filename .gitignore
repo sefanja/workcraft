@@ -38,3 +38,5 @@
 
 # Private plugins
 /_*Plugin
+*.class
+out/

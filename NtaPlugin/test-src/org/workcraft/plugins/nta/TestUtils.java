@@ -4,10 +4,8 @@ import org.junit.Assert;
 import org.workcraft.dom.Node;
 import org.workcraft.utils.Hierarchy;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestUtils {
 
@@ -15,14 +13,16 @@ public class TestUtils {
         assertNodeCountByTypeEquals(expectedModel, actualModel);
 
         for (Template expectedTemplate : expectedModel.getTemplates()) {
+            String nodeReference = expectedModel.getNodeReference(expectedTemplate);
             Template actualTemplate =
-                    (Template) actualModel.getNodeByReference(expectedModel.getNodeReference(expectedTemplate));
+                    (Template) actualModel.getNodeByReference(nodeReference);
             assertPropertiesEqual(expectedTemplate, actualTemplate);
         }
 
         for (Location expectedLocation : expectedModel.getAllLocations()) {
+            String nodeReference = expectedModel.getNodeReference(expectedLocation);
             Location actualLocation =
-                    (Location) actualModel.getNodeByReference(expectedModel.getNodeReference(expectedLocation));
+                    (Location) actualModel.getNodeByReference(nodeReference);
             assertPropertiesEqual(expectedLocation, actualLocation);
         }
 
@@ -78,7 +78,7 @@ public class TestUtils {
     private static void assertPropertiesEqual(Location expectedLocation, Location actualLocation) {
         Assert.assertNotNull(actualLocation);
         assertStringEquals(expectedLocation.getComments(), actualLocation.getComments());
-        assertStringEquals(expectedLocation.getInvariant(), actualLocation.getInvariant());
+        assertExpressionEquals(expectedLocation.getInvariant(), actualLocation.getInvariant());
         Assert.assertEquals(expectedLocation.isCommitted(), actualLocation.isCommitted());
         Assert.assertEquals(expectedLocation.isInitial(), actualLocation.isInitial());
         Assert.assertEquals(expectedLocation.isUrgent(), actualLocation.isUrgent());
@@ -86,11 +86,25 @@ public class TestUtils {
 
     private static void assertPropertiesEqual(Transition expectedTransition, Transition actualTransition) {
         Assert.assertNotNull(actualTransition);
-        assertStringEquals(expectedTransition.getAssignments(), actualTransition.getAssignments());
+        assertExpressionEquals(expectedTransition.getAssignments(), actualTransition.getAssignments());
         assertStringEquals(expectedTransition.getComments(), actualTransition.getComments());
-        assertStringEquals(expectedTransition.getGuard(), actualTransition.getGuard());
-        assertStringEquals(expectedTransition.getSelects(), actualTransition.getSelects());
+        assertExpressionEquals(expectedTransition.getGuard(), actualTransition.getGuard());
+        assertExpressionEquals(expectedTransition.getSelects(), actualTransition.getSelects());
         assertStringEquals(expectedTransition.getSynchronisation(), actualTransition.getSynchronisation());
+    }
+
+    private static void assertExpressionEquals(String expectedExpression, String actualExpression) {
+        if (expectedExpression != null && actualExpression != null) {
+            String[] expectedSplit = expectedExpression.split("(&&|,)");
+            Set<String> expectedSet = Arrays.stream(expectedSplit).map(String::trim).collect(Collectors.toSet());
+
+            String[] actualSplit = actualExpression.split("(&&|,)");
+            Set<String> actualSet = Arrays.stream(actualSplit).map(String::trim).collect(Collectors.toSet());
+
+            Assert.assertEquals(expectedSet, actualSet);
+        } else {
+            assertStringEquals(expectedExpression, actualExpression);
+        }
     }
 
     private static void assertStringEquals(String expectedString, String actualString) {
