@@ -54,10 +54,10 @@ public class TestUtils {
     }
 
     private static void assertNodeCountByTypeEquals(Nta expectedModel, Nta actualModel) {
-        Assert.assertEquals(countNodesByClass(expectedModel), countNodesByClass(actualModel));
+        Assert.assertEquals(countNodesByType(expectedModel), countNodesByType(actualModel));
     }
 
-    private static HashMap<Class, Integer> countNodesByClass(Nta nta) {
+    private static HashMap<Class, Integer> countNodesByType(Nta nta) {
         final HashMap<Class, Integer> counter = new HashMap<>();
         for (Node node : Hierarchy.getDescendants(nta.getRoot())) {
             Class c = node.getClass();
