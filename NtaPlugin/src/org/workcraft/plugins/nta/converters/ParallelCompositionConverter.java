@@ -37,24 +37,24 @@ public class ParallelCompositionConverter {
         todo = new HashSet<>();
         done = new HashSet<>();
 
-        addInitialLocation(instantiatedNta);
+        addInitialDstLocation(instantiatedNta);
 
         while (!todo.isEmpty()) {
             Location nextDstLocation = todo.stream().findAny().get();
             todo.remove(nextDstLocation);
             done.add(nextDstLocation);
 
-            Set<Transition> nonSynchronisedTransitions = getNonSynchronisedTransitions(nextDstLocation);
+            Set<Transition> nonSynchronisedTransitions = getOutgoingNonSynchronisedTransitions(nextDstLocation);
             processDstTransitions(nonSynchronisedTransitions);
 
-            Set<Transition> synchronisedTransitions = getSynchronisedTransitions(nextDstLocation);
+            Set<Transition> synchronisedTransitions = getOutgoingSynchronisedTransitions(nextDstLocation);
             processDstTransitions(synchronisedTransitions);
         }
 
         populateDstModel();
     }
 
-    private void addInitialLocation(Nta instantiatedNta) {
+    private void addInitialDstLocation(Nta instantiatedNta) {
         Set<Location> initialSrcLocations = instantiatedNta.getAllLocations().stream().filter(Location::isInitial).collect(toSet());
         Location initialDstLocation = LocationComposer.composeLocation(initialSrcLocations);
         todo.add(initialDstLocation);
@@ -71,7 +71,7 @@ public class ParallelCompositionConverter {
         Set<Location> locations = dstLocations.keySet();
         template.add(locations);
         for (Location location : locations) {
-            String name = getName(location);
+            String name = generateDstLocationName(location);
             dstModel.setName(location, name);
         }
     }
@@ -86,10 +86,7 @@ public class ParallelCompositionConverter {
         }
     }
 
-    /**
-     * Gets the outgoing, non-synchronised transitions from `dstFirstLocation`.
-     */
-    private Set<Transition> getNonSynchronisedTransitions(Location dstFirstLocation) {
+    private Set<Transition> getOutgoingNonSynchronisedTransitions(Location dstFirstLocation) {
         Set<Transition> dstTransitions = new HashSet<>();
         Set<Location> srcFirstLocations = getSrcLocations(dstFirstLocation);
 
@@ -109,7 +106,7 @@ public class ParallelCompositionConverter {
         return dstTransitions;
     }
 
-    private Set<Transition> getSynchronisedTransitions(Location dstFirstLocation) {
+    private Set<Transition> getOutgoingSynchronisedTransitions(Location dstFirstLocation) {
         Set<Transition> dstTransitions = new HashSet<>();
         Set<Location> srcFirstLocations = getSrcLocations(dstFirstLocation);
 
@@ -132,6 +129,9 @@ public class ParallelCompositionConverter {
         return dstTransitions;
     }
 
+    /**
+     * Gets the set of locations that we arrive at when starting at the `firstLocations` and taking the `transitions`.
+     */
     private Set<Location> getSecondLocations(Set<Location> firstLocations, Transition...transitions) {
         Set<Location> secondLocations = new HashSet<>(firstLocations);
         for (Transition transition : transitions) {
@@ -152,8 +152,12 @@ public class ParallelCompositionConverter {
         return dstSecondLocation;
     }
 
-    public Nta getDstModel() {
-        return dstModel;
+    private String generateDstLocationName(Location dstLocation) {
+        return LocationComposer.composeName(getSrcLocations(dstLocation), srcModel);
+    }
+
+    private Set<Location> getSrcLocations(Location dstLocation) {
+        return dstLocations.get(dstLocation);
     }
 
     private <T, E> T getKeyByValue(Map<T, E> map, E value) {
@@ -165,12 +169,8 @@ public class ParallelCompositionConverter {
         return null;
     }
 
-    public String getName(Location dstLocation) {
-        return LocationComposer.composeName(getSrcLocations(dstLocation), srcModel);
-    }
-
-    private Set<Location> getSrcLocations(Location dstLocation) {
-        return dstLocations.get(dstLocation);
+    public Nta getDstModel() {
+        return dstModel;
     }
 
 }
