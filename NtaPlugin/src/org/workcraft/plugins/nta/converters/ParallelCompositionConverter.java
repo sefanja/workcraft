@@ -44,10 +44,10 @@ public class ParallelCompositionConverter {
             todo.remove(nextDstLocation);
             done.add(nextDstLocation);
 
-            Set<Transition> nonSynchronisedTransitions = getOutgoingNonSynchronisedTransitions(nextDstLocation);
+            Set<Transition> nonSynchronisedTransitions = generateOutgoingNonSynchronisedTransitions(nextDstLocation);
             processDstTransitions(nonSynchronisedTransitions);
 
-            Set<Transition> synchronisedTransitions = getOutgoingSynchronisedTransitions(nextDstLocation);
+            Set<Transition> synchronisedTransitions = generateOutgoingSynchronisedTransitions(nextDstLocation);
             processDstTransitions(synchronisedTransitions);
         }
 
@@ -86,7 +86,7 @@ public class ParallelCompositionConverter {
         }
     }
 
-    private Set<Transition> getOutgoingNonSynchronisedTransitions(Location dstFirstLocation) {
+    private Set<Transition> generateOutgoingNonSynchronisedTransitions(Location dstFirstLocation) {
         Set<Transition> dstTransitions = new HashSet<>();
         Set<Location> srcFirstLocations = getSrcLocations(dstFirstLocation);
 
@@ -106,7 +106,7 @@ public class ParallelCompositionConverter {
         return dstTransitions;
     }
 
-    private Set<Transition> getOutgoingSynchronisedTransitions(Location dstFirstLocation) {
+    private Set<Transition> generateOutgoingSynchronisedTransitions(Location dstFirstLocation) {
         Set<Transition> dstTransitions = new HashSet<>();
         Set<Location> srcFirstLocations = getSrcLocations(dstFirstLocation);
 
